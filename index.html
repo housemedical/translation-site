@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio/Video Translation Service</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .card {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        .drop-zone {
+            border: 2px dashed #3b82f6;
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .drop-zone:hover {
+            background-color: #eff6ff;
+        }
+        .drop-zone.active {
+            background-color: #dbeafe;
+            border-color: #2563eb;
+        }
+        .progress-bar {
+            height: 10px;
+            background-color: #e5e7eb;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background-color: #3b82f6;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .results {
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+            background-color: #f9fafb;
+            border-radius: 5px;
+            padding: 1rem;
+            border: 1px solid #e5e7eb;
+        }
+        .hidden {
+            display: none;
+        }
+        .feature-icon {
+            background-color: #dbeafe;
+            color: #3b82f6;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+        .header-image {
+            height: 200px;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            color: white;
+        }
+        /* Spinner */
+        .spinner {
+            border: 4px solid #e5e7eb;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-image">
+            <h1 class="text-4xl font-bold text-center text-white">Audio &amp; Video Translation Service</h1>
+        </div>
+
+        <!-- Token Card -->
+        <div class="card">
+            <h2 class="text-xl font-bold mb-2">Access Token</h2>
+            <p class="text-gray-600 mb-4">Enter the private token you were given to enable the uploader.</p>
+            <input id="token-input" type="password" placeholder="Paste your token here"
+                   class="w-full p-3 border rounded-lg mb-2 focus:outline-none focus:ring focus:border-blue-300" />
+            <p id="token-error" class="text-red-600 text-sm hidden">Token is required.</p>
+        </div>
+
+        <!-- Main Upload Card -->
+        <div class="card">
+            <h2 class="text-2xl font-bold mb-4">Upload Your File</h2>
+            <p class="mb-4 text-gray-600">Upload an MP3 or MP4 file to get an English transcript of the audio content.</p>
+
+            <div id="drop-zone" class="drop-zone" role="button" aria-label="File Upload Area">
+                <i class="fas fa-cloud-upload-alt text-4xl text-blue-500 mb-2" aria-hidden="true"></i>
+                <p class="mb-2 font-medium">Drag &amp; Drop your file here</p>
+                <p class="text-sm text-gray-500 mb-3">or</p>
+                <button id="browse-btn" class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition" title="Browse Files">
+                    Browse Files
+                </button>
+                <input type="file" id="file-input" class="hidden" accept=".mp3,.mp4">
+                <p class="mt-2 text-sm text-gray-500">Supported formats: MP3, MP4</p>
+                <p class="mt-1 text-sm text-gray-500">Maximum file size: 50MB</p>
+            </div>
+
+            <div id="file-details" class="mt-4 hidden">
+                <div class="flex items-center">
+                    <i id="file-icon" class="fas fa-file-audio text-blue-500 mr-2"></i>
+                    <span id="file-name" class="font-medium"></span>
+                    <span id="file-size" class="ml-2 text-sm text-gray-500"></span>
+                    <button id="remove-file" class="ml-auto text-red-500 hover:text-red-600" title="Remove file">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Progress -->
+            <div id="progress-container" class="mt-4 hidden">
+                <div class="spinner" id="spinner"></div>
+                <p id="progress-status" class="text-center mt-2 text-gray-600">Uploading…</p>
+            </div>
+
+            <div class="mt-4 text-center">
+                <button id="upload-btn" class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-6 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled>
+                    Start Transcription
+                </button>
+            </div>
+        </div>
+
+        <!-- Results Card -->
+        <div id="results-card" class="card hidden">
+            <h2 class="text-2xl font-bold mb-4">Transcription Results</h2>
+            <div id="transcript-results" class="results" aria-live="polite"></div>
+            <div class="mt-4 flex justify-between">
+                <button id="copy-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded-lg transition flex items-center" title="Copy text to clipboard">
+                    <i class="fas fa-copy mr-2" aria-hidden="true"></i> Copy Text
+                </button>
+                <button id="new-upload-btn" class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition">
+                    Process New File
+                </button>
+            </div>
+        </div>
+
+        <!-- How It Works Card -->
+        <div class="card">
+            <h2 class="text-2xl font-bold mb-6">How It Works</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="text-center">
+                    <div class="feature-icon mx-auto">
+                        <i class="fas fa-upload"></i>
+                    </div>
+                    <h3 class="text-lg font-medium mb-2">1. Upload</h3>
+                    <p class="text-gray-600">Upload your MP3 or MP4 file using our secure interface.</p>
+                </div>
+                <div class="text-center">
+                    <div class="feature-icon mx-auto">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <h3 class="text-lg font-medium mb-2">2. Process</h3>
+                    <p class="text-gray-600">Our system processes it using advanced speech recognition.</p>
+                </div>
+                <div class="text-center">
+                    <div class="feature-icon mx-auto">
+                        <i class="fas fa-language"></i>
+                    </div>
+                    <h3 class="text-lg font-medium mb-2">3. Translate</h3>
+                    <p class="text-gray-600">Receive your transcript in perfect English, ready to use.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-8 text-center text-gray-500 text-sm">
+            <p>&copy; 2025 Audio &amp; Video Translation Service. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        const API_URL = 'https://api.mytranslation.co.uk/transcribe';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements
+            const tokenInput = document.getElementById('token-input');
+            const tokenError = document.getElementById('token-error');
+            const dropZone = document.getElementById('drop-zone');
+            const fileInput = document.getElementById('file-input');
+            const browseBtn = document.getElementById('browse-btn');
+            const uploadBtn = document.getElementById('upload-btn');
+            const fileDetails = document.getElementById('file-details');
+            const fileName = document.getElementById('file-name');
+            const fileSize = document.getElementById('file-size');
+            const fileIcon = document.getElementById('file-icon');
+            const removeFile = document.getElementById('remove-file');
+            const progressContainer = document.getElementById('progress-container');
+            const progressStatus = document.getElementById('progress-status');
+            const resultsCard = document.getElementById('results-card');
+            const transcriptResults = document.getElementById('transcript-results');
+            const copyBtn = document.getElementById('copy-btn');
+            const newUploadBtn = document.getElementById('new-upload-btn');
+
+            let selectedFile = null;
+            let authToken = '';
+
+            tokenInput.addEventListener('input', () => {
+                authToken = tokenInput.value.trim();
+                tokenError.classList.add('hidden');
+                toggleUploadButton();
+            });
+
+            // Browse button click
+            browseBtn.addEventListener('click', function() {
+                fileInput.click();
+            });
+
+            // File input change
+            fileInput.addEventListener('change', function(e) {
+                handleFileSelection(e.target.files[0]);
+            });
+
+            // Drag and drop events
+            ['dragover', 'dragenter'].forEach(evt => {
+                dropZone.addEventListener(evt, e => {
+                    e.preventDefault();
+                    dropZone.classList.add('active');
+                });
+            });
+            ['dragleave', 'drop'].forEach(evt => {
+                dropZone.addEventListener(evt, e => {
+                    e.preventDefault();
+                    dropZone.classList.remove('active');
+                });
+            });
+            dropZone.addEventListener('drop', e => handleFileSelection(e.dataTransfer.files[0]));
+
+            // Remove file
+            removeFile.addEventListener('click', function() {
+                resetFileSelection();
+            });
+
+            // Upload button click
+            uploadBtn.addEventListener('click', function() {
+                if (selectedFile) {
+                    uploadFile();
+                }
+            });
+
+            // Copy text button
+            copyBtn.addEventListener('click', function() {
+                const text = transcriptResults.textContent;
+                navigator.clipboard.writeText(text).then(function() {
+                    copyBtn.innerHTML = '<i class="fas fa-check mr-2"></i> Copied!';
+                    setTimeout(function() {
+                        copyBtn.innerHTML = '<i class="fas fa-copy mr-2"></i> Copy Text';
+                    }, 2000);
+                });
+            });
+
+            // New upload button
+            newUploadBtn.addEventListener('click', function() {
+                resetFileSelection();
+                resultsCard.classList.add('hidden');
+                tokenInput.value = '';
+                authToken = '';
+                toggleUploadButton();
+            });
+
+            function toggleUploadButton() {
+                uploadBtn.disabled = !(selectedFile && authToken);
+            }
+
+            // Handle file selection
+            function handleFileSelection(file) {
+                // Check if file is selected
+                if (!file) return;
+
+                // Check file type
+                const fileType = file.type;
+                if (fileType !== 'audio/mp3' && fileType !== 'video/mp4' &&
+                    !file.name.endsWith('.mp3') && !file.name.endsWith('.mp4')) {
+                    alert('Please select an MP3 or MP4 file.');
+                    return;
+                }
+
+                // Check file size (50MB limit)
+                if (file.size > 50 * 1024 * 1024) {
+                    alert('File size exceeds 50MB limit. Please select a smaller file.');
+                    return;
+                }
+
+                selectedFile = file;
+
+                // Update file details
+                fileName.textContent = file.name;
+                fileSize.textContent = formatFileSize(file.size);
+
+                // Set appropriate icon
+                if (file.type.includes('audio') || file.name.endsWith('.mp3')) {
+                    fileIcon.className = 'fas fa-file-audio text-blue-500 mr-2';
+                } else {
+                    fileIcon.className = 'fas fa-file-video text-blue-500 mr-2';
+                }
+
+                fileDetails.classList.remove('hidden');
+                toggleUploadButton();
+            }
+
+            // Reset file selection
+            function resetFileSelection() {
+                selectedFile = null;
+                fileInput.value = '';
+                fileDetails.classList.add('hidden');
+                progressContainer.classList.add('hidden');
+                uploadBtn.disabled = true;
+            }
+
+            // Format file size
+            function formatFileSize(bytes) {
+                if (bytes < 1024) return bytes + ' B';
+                if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+                return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+            }
+
+            // Upload to API
+            async function uploadFile() {
+                if (!authToken) {
+                    tokenError.classList.remove('hidden');
+                    return;
+                }
+
+                progressContainer.classList.remove('hidden');
+                progressStatus.textContent = 'Uploading…';
+
+                const body = new FormData();
+                body.append('file', selectedFile);
+
+                try {
+                    const res = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Authorization': 'Bearer ' + authToken },
+                        body
+                    });
+                    if (res.status === 401) throw new Error('Unauthorized – Invalid token');
+                    if (!res.ok) throw new Error('Server error');
+                    const data = await res.json();
+                    transcriptResults.textContent = data.transcript || '(no transcript returned)';
+                    resultsCard.classList.remove('hidden');
+                    progressContainer.classList.add('hidden');
+                } catch (err) {
+                    progressStatus.textContent = 'Error';
+                    alert(err.message);
+                    console.error(err);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
