@@ -352,35 +352,35 @@
             }
 
             // Upload to API
-            async function uploadFile() {
-                if (!authToken) {
-                    tokenError.classList.remove('hidden');
-                    return;
-                }
-
-                progressContainer.classList.remove('hidden');
-                progressStatus.textContent = 'Uploading…';
-
-                const body = new FormData();
-                body.append('file', selectedFile);
-
-                try {
-                    const res = await fetch(API_URL, {
-                        method: 'POST',
-                        headers: { 'Authorization': 'Bearer ' + authToken },
-                        body
-                    });
-                    if (res.status === 401) throw new Error('Unauthorized – Invalid token');
-                    if (!res.ok) throw new Error('Server error');
-                    const data = await res.json();
-                    transcriptResults.textContent = data.transcript || '(no transcript returned)';
-                    resultsCard.classList.remove('hidden');
-                    progressContainer.classList.add('hidden');
-                } catch (err) {
-                    progressStatus.textContent = 'Error';
-                    alert(err.message);
-                    console.error(err);
-                }
+            async function uploadFile(file, token) {
+              const fd = new FormData();
+              fd.append("file", file);
+            
+              const makeHeaders = () => ({
+                "Authorization": `Bearer ${token}`
+              });
+            
+              // 1. create job
+              const res1 = await fetch("https://api.mytranslation.co.uk/jobs", {
+                method: "POST",
+                headers: makeHeaders(),
+                body: fd
+              });
+              const { job_id } = await res1.json();
+            
+              // 2. poll until done
+              let status = "running", text = "";
+              while (status === "running") {
+                await new Promise(r => setTimeout(r, 5000));  // 5‑s poll
+                const res2 = await fetch(`https://api.mytranslation.co.uk/jobs/${job_id}`, {
+                  headers: makeHeaders()
+                });
+                const j = await res2.json();
+                status = j.status;
+                if (status === "done")  text = j.text;
+                else if (status === "error") throw new Error("Transcription failed");
+              }
+              return text;
             }
         });
     </script>
