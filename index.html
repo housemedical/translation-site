@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Audio/Video Translation Service</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css" />
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f5f7fa;
             color: #333;
         }
@@ -96,8 +96,12 @@
             margin: 0 auto;
         }
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
         }
     </style>
 </head>
@@ -111,8 +115,11 @@
         <div class="card">
             <h2 class="text-xl font-bold mb-2">Access Token</h2>
             <p class="text-gray-600 mb-4">Enter the private token you were given to enable the uploader.</p>
-            <input id="token-input" type="password" placeholder="Paste your token here"
-                   class="w-full p-3 border rounded-lg mb-2 focus:outline-none focus:ring focus:border-blue-300" />
+            <input
+                id="token-input"
+                type="password"
+                placeholder="Paste your token here"
+                class="w-full p-3 border rounded-lg mb-2 focus:outline-none focus:ring focus:border-blue-300" />
             <p id="token-error" class="text-red-600 text-sm hidden">Token is required.</p>
         </div>
 
@@ -128,7 +135,7 @@
                 <button id="browse-btn" class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition" title="Browse Files">
                     Browse Files
                 </button>
-                <input type="file" id="file-input" class="hidden" accept=".mp3,.mp4">
+                <input type="file" id="file-input" class="hidden" accept=".mp3,.mp4" />
                 <p class="mt-2 text-sm text-gray-500">Supported formats: MP3, MP4</p>
                 <p class="mt-1 text-sm text-gray-500">Maximum file size: 50MB</p>
             </div>
@@ -151,8 +158,10 @@
             </div>
 
             <div class="mt-4 text-center">
-                <button id="upload-btn" class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-6 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
-                        disabled>
+                <button
+                    id="upload-btn"
+                    class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-6 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled>
                     Start Transcription
                 </button>
             </div>
@@ -163,7 +172,10 @@
             <h2 class="text-2xl font-bold mb-4">Transcription Results</h2>
             <div id="transcript-results" class="results" aria-live="polite"></div>
             <div class="mt-4 flex justify-between">
-                <button id="copy-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded-lg transition flex items-center" title="Copy text to clipboard">
+                <button
+                    id="copy-btn"
+                    class="bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded-lg transition flex items-center"
+                    title="Copy text to clipboard">
                     <i class="fas fa-copy mr-2" aria-hidden="true"></i> Copy Text
                 </button>
                 <button id="new-upload-btn" class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition">
@@ -177,23 +189,17 @@
             <h2 class="text-2xl font-bold mb-6">How It Works</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="text-center">
-                    <div class="feature-icon mx-auto">
-                        <i class="fas fa-upload"></i>
-                    </div>
+                    <div class="feature-icon mx-auto"><i class="fas fa-upload"></i></div>
                     <h3 class="text-lg font-medium mb-2">1. Upload</h3>
                     <p class="text-gray-600">Upload your MP3 or MP4 file using our secure interface.</p>
                 </div>
                 <div class="text-center">
-                    <div class="feature-icon mx-auto">
-                        <i class="fas fa-cogs"></i>
-                    </div>
+                    <div class="feature-icon mx-auto"><i class="fas fa-cogs"></i></div>
                     <h3 class="text-lg font-medium mb-2">2. Process</h3>
                     <p class="text-gray-600">Our system processes it using advanced speech recognition.</p>
                 </div>
                 <div class="text-center">
-                    <div class="feature-icon mx-auto">
-                        <i class="fas fa-language"></i>
-                    </div>
+                    <div class="feature-icon mx-auto"><i class="fas fa-language"></i></div>
                     <h3 class="text-lg font-medium mb-2">3. Translate</h3>
                     <p class="text-gray-600">Receive your transcript in perfect English, ready to use.</p>
                 </div>
@@ -207,182 +213,195 @@
     </div>
 
     <script>
-        const API_URL = 'https://api.mytranslation.co.uk/transcribe';
+        const API_BASE = "https://api.mytranslation.co.uk";
+        // Elements
+        let tokenInput,
+            tokenError,
+            dropZone,
+            fileInput,
+            browseBtn,
+            uploadBtn,
+            fileDetails,
+            fileNameEl,
+            fileSizeEl,
+            fileIcon,
+            removeFileBtn,
+            progressContainer,
+            progressStatus,
+            resultsCard,
+            transcriptResults,
+            copyBtn,
+            newUploadBtn;
 
-        document.addEventListener('DOMContentLoaded', function() {
-            // Elements
-            const tokenInput = document.getElementById('token-input');
-            const tokenError = document.getElementById('token-error');
-            const dropZone = document.getElementById('drop-zone');
-            const fileInput = document.getElementById('file-input');
-            const browseBtn = document.getElementById('browse-btn');
-            const uploadBtn = document.getElementById('upload-btn');
-            const fileDetails = document.getElementById('file-details');
-            const fileName = document.getElementById('file-name');
-            const fileSize = document.getElementById('file-size');
-            const fileIcon = document.getElementById('file-icon');
-            const removeFile = document.getElementById('remove-file');
-            const progressContainer = document.getElementById('progress-container');
-            const progressStatus = document.getElementById('progress-status');
-            const resultsCard = document.getElementById('results-card');
-            const transcriptResults = document.getElementById('transcript-results');
-            const copyBtn = document.getElementById('copy-btn');
-            const newUploadBtn = document.getElementById('new-upload-btn');
+        let selectedFile = null;
 
-            let selectedFile = null;
-            let authToken = '';
+        document.addEventListener("DOMContentLoaded", init);
 
-            tokenInput.addEventListener('input', () => {
-                authToken = tokenInput.value.trim();
-                tokenError.classList.add('hidden');
+        function init() {
+            // cache DOM
+            tokenInput = document.getElementById("token-input");
+            tokenError = document.getElementById("token-error");
+            dropZone = document.getElementById("drop-zone");
+            fileInput = document.getElementById("file-input");
+            browseBtn = document.getElementById("browse-btn");
+            uploadBtn = document.getElementById("upload-btn");
+            fileDetails = document.getElementById("file-details");
+            fileNameEl = document.getElementById("file-name");
+            fileSizeEl = document.getElementById("file-size");
+            fileIcon = document.getElementById("file-icon");
+            removeFileBtn = document.getElementById("remove-file");
+            progressContainer = document.getElementById("progress-container");
+            progressStatus = document.getElementById("progress-status");
+            resultsCard = document.getElementById("results-card");
+            transcriptResults = document.getElementById("transcript-results");
+            copyBtn = document.getElementById("copy-btn");
+            newUploadBtn = document.getElementById("new-upload-btn");
+
+            // load saved token
+            tokenInput.value = localStorage.getItem("token") || "";
+            tokenInput.addEventListener("input", () => {
+                localStorage.setItem("token", tokenInput.value.trim());
+                tokenError.classList.add("hidden");
                 toggleUploadButton();
             });
 
-            // Browse button click
-            browseBtn.addEventListener('click', function() {
-                fileInput.click();
-            });
+            // browse
+            browseBtn.addEventListener("click", () => fileInput.click());
+            fileInput.addEventListener("change", e => handleFileSelection(e.target.files[0]));
 
-            // File input change
-            fileInput.addEventListener('change', function(e) {
-                handleFileSelection(e.target.files[0]);
-            });
+            // drag‑and‑drop
+            ["dragover", "dragenter"].forEach(evt => dropZone.addEventListener(evt, e => {
+                e.preventDefault();
+                dropZone.classList.add("active");
+            }));
+            ["dragleave", "drop"].forEach(evt => dropZone.addEventListener(evt, e => {
+                e.preventDefault();
+                dropZone.classList.remove("active");
+            }));
+            dropZone.addEventListener("drop", e => handleFileSelection(e.dataTransfer.files[0]));
 
-            // Drag and drop events
-            ['dragover', 'dragenter'].forEach(evt => {
-                dropZone.addEventListener(evt, e => {
-                    e.preventDefault();
-                    dropZone.classList.add('active');
-                });
-            });
-            ['dragleave', 'drop'].forEach(evt => {
-                dropZone.addEventListener(evt, e => {
-                    e.preventDefault();
-                    dropZone.classList.remove('active');
-                });
-            });
-            dropZone.addEventListener('drop', e => handleFileSelection(e.dataTransfer.files[0]));
+            // remove file btn
+            removeFileBtn.addEventListener("click", resetFileSelection);
 
-            // Remove file
-            removeFile.addEventListener('click', function() {
-                resetFileSelection();
-            });
+            // upload
+            uploadBtn.addEventListener("click", startUpload);
 
-            // Upload button click
-            uploadBtn.addEventListener('click', function() {
-                if (selectedFile) {
-                    uploadFile();
-                }
-            });
-
-            // Copy text button
-            copyBtn.addEventListener('click', function() {
-                const text = transcriptResults.textContent;
-                navigator.clipboard.writeText(text).then(function() {
+            // copy
+            copyBtn.addEventListener("click", () => {
+                navigator.clipboard.writeText(transcriptResults.textContent).then(() => {
                     copyBtn.innerHTML = '<i class="fas fa-check mr-2"></i> Copied!';
-                    setTimeout(function() {
-                        copyBtn.innerHTML = '<i class="fas fa-copy mr-2"></i> Copy Text';
-                    }, 2000);
+                    setTimeout(() => (copyBtn.innerHTML = '<i class="fas fa-copy mr-2"></i> Copy Text'), 2000);
                 });
             });
 
-            // New upload button
-            newUploadBtn.addEventListener('click', function() {
+            // new upload
+            newUploadBtn.addEventListener("click", () => {
                 resetFileSelection();
-                resultsCard.classList.add('hidden');
-                tokenInput.value = '';
-                authToken = '';
-                toggleUploadButton();
+                resultsCard.classList.add("hidden");
             });
 
-            function toggleUploadButton() {
-                uploadBtn.disabled = !(selectedFile && authToken);
+            toggleUploadButton();
+        }
+
+        function toggleUploadButton() {
+            uploadBtn.disabled = !selectedFile || !tokenInput.value.trim();
+        }
+
+        function handleFileSelection(file) {
+            if (!file) return;
+
+            // validate type
+            if (!file.name.match(/\.mp[34]$/i)) {
+                alert("Please select an MP3 or MP4 file.");
+                return;
+            }
+            // validate size
+            if (file.size > 50 * 1024 * 1024) {
+                alert("File size exceeds 50 MB limit.");
+                return;
             }
 
-            // Handle file selection
-            function handleFileSelection(file) {
-                // Check if file is selected
-                if (!file) return;
+            selectedFile = file;
+            fileNameEl.textContent = file.name;
+            fileSizeEl.textContent = formatFileSize(file.size);
+            fileIcon.className = file.name.endsWith(".mp3")
+                ? "fas fa-file-audio text-blue-500 mr-2"
+                : "fas fa-file-video text-blue-500 mr-2";
 
-                // Check file type
-                const fileType = file.type;
-                if (fileType !== 'audio/mp3' && fileType !== 'video/mp4' &&
-                    !file.name.endsWith('.mp3') && !file.name.endsWith('.mp4')) {
-                    alert('Please select an MP3 or MP4 file.');
-                    return;
-                }
+            fileDetails.classList.remove("hidden");
+            toggleUploadButton();
+        }
 
-                // Check file size (50MB limit)
-                if (file.size > 50 * 1024 * 1024) {
-                    alert('File size exceeds 50MB limit. Please select a smaller file.');
-                    return;
-                }
+        function resetFileSelection() {
+            selectedFile = null;
+            fileInput.value = "";
+            fileDetails.classList.add("hidden");
+            progressContainer.classList.add("hidden");
+            uploadBtn.disabled = true;
+        }
 
-                selectedFile = file;
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + " B";
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + " KB";
+            return (bytes / 1024 / 1024).toFixed(2) + " MB";
+        }
 
-                // Update file details
-                fileName.textContent = file.name;
-                fileSize.textContent = formatFileSize(file.size);
-
-                // Set appropriate icon
-                if (file.type.includes('audio') || file.name.endsWith('.mp3')) {
-                    fileIcon.className = 'fas fa-file-audio text-blue-500 mr-2';
-                } else {
-                    fileIcon.className = 'fas fa-file-video text-blue-500 mr-2';
-                }
-
-                fileDetails.classList.remove('hidden');
-                toggleUploadButton();
+        async function startUpload() {
+            const token = tokenInput.value.trim();
+            if (!token) {
+                tokenError.classList.remove("hidden");
+                return;
             }
+            if (!selectedFile) return;
 
-            // Reset file selection
-            function resetFileSelection() {
-                selectedFile = null;
-                fileInput.value = '';
-                fileDetails.classList.add('hidden');
-                progressContainer.classList.add('hidden');
-                uploadBtn.disabled = true;
+            progressContainer.classList.remove("hidden");
+            progressStatus.textContent = "Uploading…";
+
+            try {
+                const text = await uploadFile(selectedFile, token);
+                transcriptResults.textContent = text;
+                resultsCard.classList.remove("hidden");
+                progressContainer.classList.add("hidden");
+                resetFileSelection();
+            } catch (err) {
+                progressStatus.textContent = "Error: " + err.message;
             }
+        }
 
-            // Format file size
-            function formatFileSize(bytes) {
-                if (bytes < 1024) return bytes + ' B';
-                if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
-                return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
-            }
+        async function uploadFile(file, token) {
+            const fd = new FormData();
+            fd.append("file", file);
 
-            // Upload to API
-            async function uploadFile(file, token) {
-              const fd = new FormData();
-              fd.append("file", file);
-            
-              const makeHeaders = () => ({
-                "Authorization": `Bearer ${token}`
-              });
-            
-              // 1. create job
-              const res1 = await fetch("https://api.mytranslation.co.uk/jobs", {
+            const headers = { Authorization: `Bearer ${token}` };
+
+            // create job
+            const res1 = await fetch(`${API_BASE}/jobs`, {
                 method: "POST",
-                headers: makeHeaders(),
-                body: fd
-              });
-              const { job_id } = await res1.json();
-            
-              // 2. poll until done
-              let status = "running", text = "";
-              while (status === "running") {
-                await new Promise(r => setTimeout(r, 5000));  // 5‑s poll
-                const res2 = await fetch(`https://api.mytranslation.co.uk/jobs/${job_id}`, {
-                  headers: makeHeaders()
-                });
+                headers,
+                body: fd,
+            });
+            if (res1.status === 401) throw new Error("Invalid token");
+            if (!res1.ok) throw new Error("Server error while creating job");
+            const { job_id } = await res1.json();
+
+            progressStatus.textContent = "Processing…";
+
+            // poll
+            let completed = false,
+                text = "";
+            while (!completed) {
+                await new Promise(r => setTimeout(r, 5000));
+                const res2 = await fetch(`${API_BASE}/jobs/${job_id}`, { headers });
                 const j = await res2.json();
-                status = j.status;
-                if (status === "done")  text = j.text;
-                else if (status === "error") throw new Error("Transcription failed");
-              }
-              return text;
+                if (j.status === "done") {
+                    completed = true;
+                    text = j.text;
+                } else if (j.status === "error") {
+                    throw new Error("Transcription failed on server");
+                }
             }
-        });
+            return text;
+        }
     </script>
 </body>
 </html>
